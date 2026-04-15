@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: ecommerce_postgres
+    environment:
+      POSTGRES_USER: ecom_user
+      POSTGRES_PASSWORD: ecom_pass
+      POSTGRES_DB: ecommerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./warehouse/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecom_user -d ecommerce"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow:
+    image: apache/airflow:2.7.3
+    container_name: ecommerce_airflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://ecom_user:ecom_pass@postgres:5432/ecommerce
+      AIRFLOW__CORE__FERNET_KEY: ""
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__WEBSERVER__SECRET_KEY: "ecommerce_secret"
+      DB_CONN: postgresql+psycopg2://ecom_user:ecom_pass@postgres:5432/ecommerce
+      DB_CONN_PSYCOPG2: "host=postgres port=5432 dbname=ecommerce user=ecom_user password=ecom_pass"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./ingestion:/opt/airflow/ingestion
+      - ./transformations:/opt/airflow/transformations
+      - ./quality:/opt/airflow/quality
+      - ./utils:/opt/airflow/utils
+      - ./data:/opt/airflow/data
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "pip install pandas psycopg2-binary sqlalchemy python-dotenv &&
+               airflow db init &&
+               airflow users create --username admin --password admin
+                 --firstname Admin --lastname User --role Admin --email admin@example.com &&
+               airflow webserver & airflow scheduler"
+
+volumes:
+  postgres_data:
