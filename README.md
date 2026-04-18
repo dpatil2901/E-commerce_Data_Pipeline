@@ -19,7 +19,7 @@ pipeline runtime by ~38% using parallel Airflow TaskGroups.
 ## Architecture
 
 ```
-CSV Source (Kaggle Olist — 7 files, 100K+ orders)
+CSV Source
         │
         ▼
 ┌──────────────────────────────────────────────┐
