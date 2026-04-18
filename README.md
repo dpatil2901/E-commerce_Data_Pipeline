@@ -1,6 +1,12 @@
 # E-commerce Sales Analytics Pipeline
 
-> End-to-end batch data pipeline on 100K+ real e-commerce orders — medallion architecture (Bronze/Silver/Gold), watermark-based incremental loads, idempotent bulk upserts, 15 data quality checks, and Apache Airflow orchestration. All data stored in PostgreSQL.
+>Built an end-to-end batch data pipeline processing 100K+ records using Python, PostgreSQL, and Apache Airflow with
+Medallion Architecture (Bronze/Silver/Gold) and daily incremental loads across 17 tables (4 dimension + 1 fact table) using
+star schema modeling.
+Designed watermark-based incremental ingestion and idempotent data loading, achieving ~80x performance improvement
+and preventing duplicate records during pipeline retries.
+Implemented 15+ automated data quality checks and integrated monitoring, logging, and retry mechanisms, reducing
+pipeline runtime by ~38% using parallel Airflow TaskGroups.
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue?style=flat-square)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat-square)
